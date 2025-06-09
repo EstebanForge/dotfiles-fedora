@@ -1,0 +1,9 @@
+config/*
+!config/.gitkeep
+!config/backup_config.sh
+!config/flatpak_apps.txt
+!config/dnf_packages.txt
+!config/brew_packages.txt
+!config/appimage_list.txt
+home/*
+!home/.gitkeep

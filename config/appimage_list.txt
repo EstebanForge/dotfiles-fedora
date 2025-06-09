@@ -1,0 +1,10 @@
+Ray.AppImage
+github_desktop.appimage
+obsidian.appimage
+youtube_music.appimage
+cryptomator.appimage
+ferdium.appimage
+bruno.appimage
+lm_studio.appimage
+cursor.appimage
+bitwarden.appimage

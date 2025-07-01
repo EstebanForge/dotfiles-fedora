@@ -42,3 +42,5 @@ hdparm
 ninja-build
 sqlite
 wl-clipboard
+webkit2gtk4.0
+gtk3

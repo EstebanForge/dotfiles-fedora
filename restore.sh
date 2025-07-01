@@ -20,29 +20,28 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-#
 
 # Script for post-installation setup tasks on Fedora
 
 # Ensure the script is run from the dotfiles directory
 cd "$(dirname "$0")" || exit
 
-HOME_SOURCE_DIR="home" # The directory within the dotfiles repo that mirrors the user's home for symlinking
-GENERATED_DATA_DIR="config"          # The directory within the dotfiles repo where generated backup files are stored
-USER_HOME="$HOME"                  # The actual home directory of the user
+HOME_SOURCE_DIR="home"      # The directory within the dotfiles repo that mirrors the user's home for symlinking
+GENERATED_DATA_DIR="config" # The directory within the dotfiles repo where generated backup files are stored
+USER_HOME="$HOME"           # The actual home directory of the user
 
 # Function to ask for confirmation
 confirm() {
     read -r -p "${1:-Are you sure? [y/N]} " response
     case "$response" in
-        [yY][eE][sS]|[yY]) true ;;
-        *) false ;;
+    [yY][eE][sS] | [yY]) true ;;
+    *) false ;;
     esac
 }
 
 # Function to check if a command exists
 command_exists() {
-    command -v "$1" &> /dev/null
+    command -v "$1" &>/dev/null
 }
 
 echo "Starting post-installation setup..."
@@ -90,8 +89,8 @@ setup_rpm_fusion() {
     if confirm "Install RPM Fusion repositories? [y/N]"; then
         echo "Installing RPM Fusion..."
         sudo dnf install -y \
-          "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm" \
-          "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
+            "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm" \
+            "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
         echo "RPM Fusion installation attempted."
         echo "Updating DNF cache after adding RPM Fusion repositories..."
         if sudo dnf check-update; then
@@ -137,7 +136,7 @@ install_common_dnf_packages() {
                 # Add packages from the line to the list; $line can contain multiple space-separated packages
                 packages_to_install_list+=($line)
             fi
-        done < "$dnf_packages_file"
+        done <"$dnf_packages_file"
 
         if [ ${#groups_to_install_list[@]} -gt 0 ]; then
             echo "Installing DNF groups: ${groups_to_install_list[*]}..."
@@ -252,13 +251,13 @@ install_homebrew() {
         # Even if already installed, ensure it's in PATH for the current session if possible
         local brew_executable_path="/home/linuxbrew/.linuxbrew/bin/brew"
         if [ -f "$brew_executable_path" ] && ! command_exists brew; then # Check if brew command is not found despite file existing
-             echo "Homebrew executable found, attempting to set up environment for current session..."
-             eval "$("$brew_executable_path" shellenv)"
-             if command_exists brew; then
-                 echo "Homebrew environment set up for current session."
-             else
-                 echo "Failed to set up Homebrew environment for current session from existing installation."
-             fi
+            echo "Homebrew executable found, attempting to set up environment for current session..."
+            eval "$("$brew_executable_path" shellenv)"
+            if command_exists brew; then
+                echo "Homebrew environment set up for current session."
+            else
+                echo "Failed to set up Homebrew environment for current session from existing installation."
+            fi
         fi
     fi
 }
@@ -272,7 +271,7 @@ install_brew_packages() {
             if [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
                 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
             elif [ -f /opt/homebrew/bin/brew ]; then # macOS path, but good to have a fallback
-                 eval "$(/opt/homebrew/bin/brew shellenv)"
+                eval "$(/opt/homebrew/bin/brew shellenv)"
             fi
 
             local brew_packages_file_path="$GENERATED_DATA_DIR/brew_packages.txt"
@@ -380,9 +379,9 @@ setup_docker() {
             sudo systemctl disable docker.socket
             echo "Docker auto-start disabled."
         else
-            if ! sudo systemctl is-enabled docker.service &> /dev/null; then
-                 sudo systemctl enable docker.service
-                 echo "Docker auto-start enabled."
+            if ! sudo systemctl is-enabled docker.service &>/dev/null; then
+                sudo systemctl enable docker.service
+                echo "Docker auto-start enabled."
             else
                 echo "Docker auto-start was already enabled or is currently running."
             fi
@@ -391,9 +390,9 @@ setup_docker() {
         # Docker socket permissions (usually handled by package, but good to check)
         if [ -e /var/run/docker.sock ]; then
             if ! getfacl /var/run/docker.sock | grep -q "group:docker:rw-"; then
-                 sudo chown root:docker /var/run/docker.sock
-                 sudo chmod 660 /var/run/docker.sock
-                 echo "Permissions for /var/run/docker.sock verified/set."
+                sudo chown root:docker /var/run/docker.sock
+                sudo chmod 660 /var/run/docker.sock
+                echo "Permissions for /var/run/docker.sock verified/set."
             fi
         fi
     else
@@ -421,7 +420,7 @@ setup_font_rendering() {
 
         # User-specific FreeType properties
         mkdir -p "$HOME/.config/environment.d/"
-        echo 'FREETYPE_PROPERTIES="cff:no-stem-darkening=0 autofitter:no-stem-darkening=0 type1:no-stem-darkening=0 t1cid:no-stem-darkening=0"' > "$HOME/.config/environment.d/freetype.conf"
+        echo 'FREETYPE_PROPERTIES="cff:no-stem-darkening=0 autofitter:no-stem-darkening=0 type1:no-stem-darkening=0 t1cid:no-stem-darkening=0"' >"$HOME/.config/environment.d/freetype.conf"
         echo "User FreeType properties set in $HOME/.config/environment.d/freetype.conf"
 
         # System-wide FreeType properties (subset for /etc/environment)
@@ -438,13 +437,13 @@ setup_font_rendering() {
                 # For simplicity and safety, if the key parts are missing, we add our preferred line.
                 # This could be improved by more complex sed logic to merge, but that's riskier.
                 if ! sudo grep -q "${etc_env_freetype_line}" /etc/environment; then # Add only if exact line isn't there
-                    echo "${etc_env_freetype_line}" | sudo tee -a /etc/environment > /dev/null
+                    echo "${etc_env_freetype_line}" | sudo tee -a /etc/environment >/dev/null
                     echo "System FreeType properties added to /etc/environment. Review this file for duplicates if FREETYPE_PROPERTIES existed previously with different values."
                 else
                     echo "System FreeType properties (cff & autofitter no-stem-darkening) seem to be present in /etc/environment."
                 fi
             else
-                echo "${etc_env_freetype_line}" | sudo tee -a /etc/environment > /dev/null
+                echo "${etc_env_freetype_line}" | sudo tee -a /etc/environment >/dev/null
                 echo "System FreeType properties added to /etc/environment."
             fi
         else
@@ -513,7 +512,7 @@ setup_amd_pstates_and_s2idle_grub_args() {
                 echo "Successfully added 'mem_sleep_default=s2idle'."
             else
                 echo "Failed to add 'mem_sleep_default=s2idle'."
-                 # Optionally, decide if you want to proceed or return
+                # Optionally, decide if you want to proceed or return
             fi
         fi
 
@@ -536,7 +535,7 @@ setup_system_environment() {
 
         # GNOME_SHELL_SLOWDOWN_FACTOR
         if ! grep -q "GNOME_SHELL_SLOWDOWN_FACTOR" /etc/environment; then
-            echo 'GNOME_SHELL_SLOWDOWN_FACTOR=0.5' | sudo tee -a /etc/environment > /dev/null
+            echo 'GNOME_SHELL_SLOWDOWN_FACTOR=0.5' | sudo tee -a /etc/environment >/dev/null
             echo "GNOME_SHELL_SLOWDOWN_FACTOR set in /etc/environment."
         else
             echo "GNOME_SHELL_SLOWDOWN_FACTOR already in /etc/environment."
@@ -544,7 +543,7 @@ setup_system_environment() {
 
         # ELECTRON_OZONE_PLATFORM_HINT
         if ! grep -q "ELECTRON_OZONE_PLATFORM_HINT" /etc/environment; then
-            echo 'ELECTRON_OZONE_PLATFORM_HINT=wayland' | sudo tee -a /etc/environment > /dev/null
+            echo 'ELECTRON_OZONE_PLATFORM_HINT=wayland' | sudo tee -a /etc/environment >/dev/null
             echo "ELECTRON_OZONE_PLATFORM_HINT set in /etc/environment."
         else
             echo "ELECTRON_OZONE_PLATFORM_HINT already in /etc/environment."
@@ -795,7 +794,7 @@ install_system_utilities() {
             if [ ! -f "$KEYD_CONFIG_FILE" ]; then
                 echo "Creating keyd configuration file $KEYD_CONFIG_FILE for Hyperkey..."
                 sudo mkdir -p "$(dirname "$KEYD_CONFIG_FILE")"
-                sudo tee "$KEYD_CONFIG_FILE" << 'EOF' > /dev/null
+                sudo tee "$KEYD_CONFIG_FILE" <<'EOF' >/dev/null
 [ids]
 *
 
@@ -907,7 +906,7 @@ EOF
                     echo "Symlink $LOLCATE_SYMLINK_PATH already exists and points correctly."
                 fi
             elif [ -f "$LOLCATE_SYMLINK_PATH" ]; then
-                 echo "Warning: $LOLCATE_SYMLINK_PATH exists but is not a symlink. Manual intervention may be needed."
+                echo "Warning: $LOLCATE_SYMLINK_PATH exists but is not a symlink. Manual intervention may be needed."
             fi
         fi
 
@@ -937,7 +936,7 @@ EOF
 
         # libinput-config (Mouse scroll with button)
         echo "Setting up libinput-config for mouse scroll customization..."
-        if ! command_exists libinput-config; then # Crude check, real check is if binary is in PATH
+        if ! command_exists libinput-config; then                                  # Crude check, real check is if binary is in PATH
             sudo dnf install -y libinput-devel libudev-devel meson ninja-build git # evtest already in common packages
             TEMP_DIR=$(mktemp -d)
             git clone https://gitlab.com/warningnonpotablewater/libinput-config.git "$TEMP_DIR/libinput-config"
@@ -954,7 +953,7 @@ EOF
         fi
         # Create default config if not exists
         if [ ! -f /etc/libinput.conf ]; then
-            sudo tee /etc/libinput.conf << 'EOF' > /dev/null
+            sudo tee /etc/libinput.conf <<'EOF' >/dev/null
 # /etc/libinput.conf
 # Configuration for libinput-config
 
@@ -1010,7 +1009,7 @@ setup_grub_tweaks() {
         if grep -q "GRUB_TIMEOUT=" /etc/default/grub; then
             sudo sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=3/' /etc/default/grub
         else
-            echo "GRUB_TIMEOUT=3" | sudo tee -a /etc/default/grub > /dev/null
+            echo "GRUB_TIMEOUT=3" | sudo tee -a /etc/default/grub >/dev/null
         fi
         sudo grub2-mkconfig -o /boot/grub2/grub.cfg
         echo "Grub timeout set to 3 seconds."
@@ -1058,7 +1057,7 @@ configure_sudo_secure_path() {
             return 1
         fi
 
-        echo -e "${file_content}" > "$temp_file"
+        echo -e "${file_content}" >"$temp_file"
 
         # Copy, set permissions, and set ownership
         if sudo cp "$temp_file" "$custom_sudoers_file" && sudo chmod 0440 "$custom_sudoers_file" && sudo chown root:root "$custom_sudoers_file"; then
@@ -1069,8 +1068,8 @@ configure_sudo_secure_path() {
             echo "Failed to write, set permissions, or set ownership for $custom_sudoers_file. Sudo secure_path not configured."
             # Attempt to clean up if the custom file was created but something went wrong
             if sudo test -f "$custom_sudoers_file"; then # Check with sudo as we might not have perms
-                 echo "Attempting to remove potentially problematic $custom_sudoers_file..."
-                 sudo rm -f "$custom_sudoers_file"
+                echo "Attempting to remove potentially problematic $custom_sudoers_file..."
+                sudo rm -f "$custom_sudoers_file"
             fi
             rm -f "$temp_file" # Clean up temp file regardless
             return 1
@@ -1086,7 +1085,7 @@ restore_gnome_settings() {
     if [ -f "$GENERATED_DATA_DIR/gnome-settings.dconf" ]; then
         if confirm "Restore GNOME settings from $GENERATED_DATA_DIR/gnome-settings.dconf? (This will overwrite current settings) [y/N]"; then
             echo "Restoring GNOME settings..."
-            dconf load / < "$GENERATED_DATA_DIR/gnome-settings.dconf"
+            dconf load / <"$GENERATED_DATA_DIR/gnome-settings.dconf"
             echo "GNOME settings restored."
         else
             echo "Skipping GNOME settings restore."
@@ -1129,7 +1128,7 @@ rsync_source_home_to_user_home # Call the new rsync function first
 setup_rpm_fusion
 install_common_dnf_packages
 restore_flatpak_packages # Call the new function
-setup_flatpak_overrides # Add call to the new function
+setup_flatpak_overrides  # Add call to the new function
 install_homebrew
 install_brew_packages # Depends on Homebrew
 setup_ssh_permissions
@@ -1141,8 +1140,8 @@ setup_crypto_policies
 setup_amd_pstates_and_s2idle_grub_args # Call the new function
 setup_system_environment
 install_additional_software
-install_vscode # Call the new function to install VSCode
-install_windsurf # Call the new function to install Windsurf
+install_vscode           # Call the new function to install VSCode
+install_windsurf         # Call the new function to install Windsurf
 install_system_utilities # Installs Flameshot, keyd, Ulauncher helpers, libinput-config
 setup_grub_tweaks
 configure_sudo_secure_path

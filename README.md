@@ -79,6 +79,20 @@ All scripts are designed to be run from the root of this repository.
     The script will prompt for confirmation before applying system changes.
 -   **Next Step**: After running `restore.sh`, review its output. Most setup tasks are now included.
 
+## Additional Script: `luks-enroll-tpm2.sh`
+
+This repository also includes `luks-enroll-tpm2.sh`, a helper script to automate the process of enrolling a TPM2 device for LUKS disk encryption on Fedora systems. It guides you through:
+- Verifying SecureBoot status
+- Detecting your TPM2 device and LUKS partition
+- Enrolling the TPM2 device as an unlock method for your LUKS volume
+- Updating GRUB and dracut configuration for TPM2-based unlocking
+- Verifying the configuration at each step
+
+**Warning:**
+- This script is provided **as is**, with **no warranty** and **no guarantee** of fitness for any particular purpose.
+- It is intended for advanced users who understand the risks of modifying disk encryption and bootloader settings.
+- Always back up your data before making changes to disk encryption or boot configuration.
+
 ## Manual Configuration, PikaBackup
 
 These scripts automate many parts of the setup, but some steps still require manual attention:

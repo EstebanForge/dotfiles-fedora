@@ -20,7 +20,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-#
 
 # Script to backup system configurations
 
@@ -29,20 +28,20 @@ cd "$(dirname "$0")" || exit
 
 # Function to check if a command exists
 command_exists() {
-    command -v "$1" &> /dev/null
+    command -v "$1" &>/dev/null
 }
 
 # Function to ask for confirmation
 confirm() {
     read -r -p "${1:-Are you sure? [y/N]} " response
     case "$response" in
-        [yY][eE][sS]|[yY]) true ;;
-        *) false ;;
+    [yY][eE][sS] | [yY]) true ;;
+    *) false ;;
     esac
 }
 
-HOME_DIR="home" # For user's actual dotfiles to be symlinked
-DATA_DIR="config"   # For generated backup data (package lists, etc.)
+HOME_DIR="home"                          # For user's actual dotfiles to be symlinked
+DATA_DIR="config"                        # For generated backup data (package lists, etc.)
 CONFIG_FILE="$DATA_DIR/backup_config.sh" # Path to the configuration file
 
 # Source the configuration file here, at the global scope
@@ -77,7 +76,7 @@ backup_gnome_settings() {
             return
         fi
     fi
-    dconf dump / > "$gnome_settings_file"
+    dconf dump / >"$gnome_settings_file"
     echo "GNOME settings backed up to $gnome_settings_file"
 }
 
@@ -95,7 +94,10 @@ backup_flatpak_packages() {
     fi
 
     if command_exists flatpak; then
-        (flatpak list --app --columns=application; flatpak list --app --system --columns=application) | sort -u > "$config_flatpak_apps_file"
+        (
+            flatpak list --app --columns=application
+            flatpak list --app --system --columns=application
+        ) | sort -u >"$config_flatpak_apps_file"
         echo "Combined Flatpak application list saved to $config_flatpak_apps_file"
     else
         echo "Flatpak command not found. Skipping Flatpak backup."
@@ -123,9 +125,9 @@ backup_brew_packages() {
             echo "Filtering out vscode extensions from $brew_packages_file_path..."
             local temp_brew_file
             temp_brew_file=$(mktemp)
-            grep -v '^vscode ' "$brew_packages_file_path" > "$temp_brew_file"
+            grep -v '^vscode ' "$brew_packages_file_path" >"$temp_brew_file"
             # Check if grep succeeded and the temp file is not empty (to prevent overwriting with an empty file if all lines were vscode lines)
-            if [ $? -eq 0 ]; then # grep succeeded
+            if [ $? -eq 0 ]; then                 # grep succeeded
                 if [ -s "$temp_brew_file" ]; then # temp file is not empty
                     mv "$temp_brew_file" "$brew_packages_file_path"
                     echo "Successfully filtered vscode extensions."
@@ -156,37 +158,37 @@ backup_appimage_list() {
     fi
 
     if [ -d "$HOME/Applications" ]; then
-      find "$HOME/Applications/" -maxdepth 1 -type f -iname "*.appimage" -printf "%f\n" > "$appimage_list_file"
-      echo "AppImage list saved to $appimage_list_file"
+        find "$HOME/Applications/" -maxdepth 1 -type f -iname "*.appimage" -printf "%f\n" >"$appimage_list_file"
+        echo "AppImage list saved to $appimage_list_file"
     else
-      echo "No ~/Applications directory found. Skipping AppImage backup."
-      touch "$appimage_list_file"
+        echo "No ~/Applications directory found. Skipping AppImage backup."
+        touch "$appimage_list_file"
     fi
 }
 
 # Helper function for backup_critical_dotfiles
 _backup_dotfile_item() {
-  local source_item_path="$1"
-  local target_item_name="$2"
-  local backup_dest_path="$HOME_DIR/$target_item_name"
+    local source_item_path="$1"
+    local target_item_name="$2"
+    local backup_dest_path="$HOME_DIR/$target_item_name"
 
-  # Ensure the parent directory of the destination exists
-  local target_parent_dir=$(dirname "$backup_dest_path")
-  if [ ! -d "$target_parent_dir" ]; then
-      mkdir -p "$target_parent_dir"
-      echo "Created directory structure: $target_parent_dir"
-  fi
-
-  if [ -e "$source_item_path" ]; then
-    echo "Backing up '$source_item_path' to '$backup_dest_path' using rsync..."
-    if rsync -avh --no-perms --delete "$source_item_path" "$backup_dest_path"; then
-      echo "Successfully backed up '$target_item_name'."
-    else
-      echo "Error during rsync of '$target_item_name'. Check rsync output above."
+    # Ensure the parent directory of the destination exists
+    local target_parent_dir=$(dirname "$backup_dest_path")
+    if [ ! -d "$target_parent_dir" ]; then
+        mkdir -p "$target_parent_dir"
+        echo "Created directory structure: $target_parent_dir"
     fi
-  else
-    echo "Source '$source_item_path' not found, skipping."
-  fi
+
+    if [ -e "$source_item_path" ]; then
+        echo "Backing up '$source_item_path' to '$backup_dest_path' using rsync..."
+        if rsync -avh --no-perms --delete "$source_item_path" "$backup_dest_path"; then
+            echo "Successfully backed up '$target_item_name'."
+        else
+            echo "Error during rsync of '$target_item_name'. Check rsync output above."
+        fi
+    else
+        echo "Source '$source_item_path' not found, skipping."
+    fi
 }
 
 backup_critical_dotfiles() {

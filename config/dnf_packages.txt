@@ -44,3 +44,9 @@ sqlite
 wl-clipboard
 webkit2gtk4.0
 gtk3
+libicu
+libjpeg-turbo
+libwebp
+flite
+pcre
+libffi

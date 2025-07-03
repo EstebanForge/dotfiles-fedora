@@ -1,7 +1,7 @@
 #!/bin/bash
 # MIT License
 #
-# Copyright (c) 2024 Esteban Cuevas <esteban at actitud dot xyz>
+# Copyright (c) 2025 Esteban Cuevas <esteban at actitud dot xyz>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -1095,6 +1095,19 @@ restore_gnome_settings() {
     fi
 }
 
+# --- GNOME Ptyxis Opacity ---
+set_gnome_ptyxis_opacity() {
+    local uuid
+    uuid=$(dconf read /org/gnome/Ptyxis/default-profile-uuid | tr -d "'")
+    if [ -n "$uuid" ]; then
+        echo "Setting GNOME Ptyxis opacity for profile $uuid to 0.95..."
+        dconf write "/org/gnome/Ptyxis/Profiles/${uuid}/opacity" 0.95
+        echo "GNOME Ptyxis opacity set."
+    else
+        echo "Could not determine GNOME Ptyxis default profile UUID. Skipping opacity setting."
+    fi
+}
+
 # --- Finalization ---
 finalize_setup() {
     echo -e "\n---------------------------------------------------------------------"
@@ -1135,6 +1148,7 @@ setup_ssh_permissions
 setup_zsh # Installs Zsh, OhMyZsh, plugins
 setup_docker
 setup_gnome_settings
+set_gnome_ptyxis_opacity # Set Ptyxis opacity after GNOME settings
 setup_font_rendering
 setup_crypto_policies
 setup_amd_pstates_and_s2idle_grub_args # Call the new function

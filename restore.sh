@@ -1100,8 +1100,8 @@ set_gnome_ptyxis_opacity() {
     local uuid
     uuid=$(dconf read /org/gnome/Ptyxis/default-profile-uuid | tr -d "'")
     if [ -n "$uuid" ]; then
-        echo "Setting GNOME Ptyxis opacity for profile $uuid to 0.95..."
-        dconf write "/org/gnome/Ptyxis/Profiles/${uuid}/opacity" 0.95
+        echo "Setting GNOME Ptyxis opacity for profile $uuid to 0.99..."
+        dconf write "/org/gnome/Ptyxis/Profiles/${uuid}/opacity" 0.99
         echo "GNOME Ptyxis opacity set."
     else
         echo "Could not determine GNOME Ptyxis default profile UUID. Skipping opacity setting."
